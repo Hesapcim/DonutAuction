@@ -16,6 +16,8 @@ public interface AuctionRepository {
 
     CompletableFuture<Void> update(AuctionListing listing);
 
+    CompletableFuture<Void> delete(UUID auctionId);
+
     CompletableFuture<Optional<AuctionListing>> findById(UUID auctionId);
 
     CompletableFuture<List<AuctionListing>> findBySeller(UUID sellerId);

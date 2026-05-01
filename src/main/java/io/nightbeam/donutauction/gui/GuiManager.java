@@ -2,6 +2,7 @@ package io.nightbeam.donutauction.gui;
 
 import io.nightbeam.donutauction.AuctionHousePlugin;
 import io.nightbeam.donutauction.hook.DonutCoreHook;
+import io.nightbeam.donutauction.model.AuctionListing;
 import io.nightbeam.donutauction.model.PlayerAuctionSession;
 import io.nightbeam.donutauction.service.AuctionManager;
 import io.nightbeam.donutauction.service.AuctionService;
@@ -46,6 +47,14 @@ public final class GuiManager {
         open(player, new PlayerAuctionGui(this, auctionService, playerItemsPage(player.getUniqueId())));
     }
 
+    public void openAdminRemovalMenu(Player player, PlayerAuctionSession session, AuctionListing listing) {
+        openAdminRemovalMenu(player, session, listing, true);
+    }
+
+    public void openAdminRemovalMenu(Player player, PlayerAuctionSession session, AuctionListing listing, boolean notifySeller) {
+        open(player, new AdminRemovalGui(this, auctionService, session, listing, notifySeller));
+    }
+
     public void setPlayerItemsPage(UUID playerId, int page) {
         playerItemsPages.put(playerId, Math.max(1, page));
     }
@@ -60,7 +69,7 @@ public final class GuiManager {
 
     public void beginSearch(Player player) {
         awaitingSearch.add(player.getUniqueId());
-        plugin.messages().send(player, "&eType an item name in chat to search the auction house.");
+        plugin.messages().send(player, "search-prompt", "&eType an item name in chat to search the auction house.");
         player.closeInventory();
     }
 
@@ -69,6 +78,13 @@ public final class GuiManager {
     }
 
     public void handleSearchInput(Player player, String query) {
+        awaitingSearch.remove(player.getUniqueId());
+        PlayerAuctionSession session = session(player);
+        session.request(session.request().withSearch(query));
+        openAuctionHouse(player, session);
+    }
+
+    public void applySearch(Player player, String query) {
         awaitingSearch.remove(player.getUniqueId());
         PlayerAuctionSession session = session(player);
         session.request(session.request().withSearch(query));

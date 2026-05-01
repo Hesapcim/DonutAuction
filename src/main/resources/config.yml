@@ -17,6 +17,4 @@ auction:
   min-price: 10
   max-price: 1.0E9
 
-messages:
-  prefix: '&6&lAuctionHouse &8» '
-  price-below-min: '&cMinimum auction price is &6%min_price%&c.'
+blocked-materials: []

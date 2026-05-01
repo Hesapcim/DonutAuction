@@ -26,12 +26,12 @@ public final class AuctionCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players can use this command.");
+            plugin.messages().send(sender, "only-players", "&cOnly players can use this command.");
             return true;
         }
 
         if (!player.hasPermission("donutcore.auction.use")) {
-            plugin.messages().send(player, "&cYou do not have permission to use the auction house.");
+            plugin.messages().send(player, "no-permission-use", "&cYou do not have permission to use the auction house.");
             return true;
         }
 
@@ -42,24 +42,24 @@ public final class AuctionCommand implements CommandExecutor, TabCompleter {
 
         if (args[0].equalsIgnoreCase("sell")) {
             if (!player.hasPermission("donutcore.auction.sell")) {
-                plugin.messages().send(player, "&cYou do not have permission to sell items.");
+                plugin.messages().send(player, "no-permission-sell", "&cYou do not have permission to sell items.");
                 return true;
             }
             if (args.length < 2) {
-                plugin.messages().send(player, "&cUsage: /ah sell <price>");
+                plugin.messages().send(player, "sell-usage", "&cUsage: /ah sell <price>");
                 return true;
             }
             double price;
             try {
                 price = Double.parseDouble(args[1]);
             } catch (NumberFormatException exception) {
-                plugin.messages().send(player, "&cInvalid price.");
+                plugin.messages().send(player, "invalid-price", "&cInvalid price.");
                 return true;
             }
 
             ItemStack itemInHand = player.getInventory().getItemInMainHand();
             auctionService.createAuction(player, itemInHand, price).thenAccept(result -> plugin.schedulerAdapter().runEntity(player, () -> {
-                plugin.messages().send(player, result.message());
+                plugin.messages().sendRaw(player, result.message());
                 if (result.success()) {
                     guiManager.openPlayerItems(player);
                 }
@@ -69,13 +69,12 @@ public final class AuctionCommand implements CommandExecutor, TabCompleter {
 
         if (args[0].equalsIgnoreCase("reload")) {
             if (!player.hasPermission("donutcore.auction.admin")) {
-                plugin.messages().send(player, "&cYou do not have permission to reload this plugin.");
+                plugin.messages().send(player, "no-permission-reload", "&cYou do not have permission to reload this plugin.");
                 return true;
             }
 
-            plugin.reloadConfig();
-            plugin.applyConfigDefaults();
-            plugin.messages().send(player, "&aDonutAuctionHouse configuration reloaded.");
+            plugin.reloadPluginConfiguration();
+            plugin.messages().send(player, "config-reloaded", "&aDonutAuctionHouse configuration reloaded.");
             return true;
         }
 
@@ -84,7 +83,7 @@ public final class AuctionCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        guiManager.openAuctionHouse(player);
+        guiManager.applySearch(player, String.join(" ", args).trim());
         return true;
     }
 

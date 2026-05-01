@@ -8,17 +8,16 @@ import io.nightbeam.donutauction.model.PlayerAuctionSession;
 import io.nightbeam.donutauction.service.ActionResult;
 import io.nightbeam.donutauction.service.AuctionService;
 import io.nightbeam.donutauction.util.ItemBuilder;
+import io.nightbeam.donutauction.util.MessageUtil;
 import io.nightbeam.donutauction.util.TimeUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -26,13 +25,11 @@ import org.bukkit.inventory.ItemStack;
 
 public final class AuctionGui extends BaseGui {
 
-    private static final Component TITLE = Component.text("ᴀᴜᴄᴛɪᴏɴ", NamedTextColor.GOLD);
-
     private final GuiManager guiManager;
     private final AuctionService auctionService;
     private final DonutCoreHook donutCoreHook;
     private final PlayerAuctionSession session;
-    private final Map<Integer, UUID> slotMappings = new HashMap<>();
+    private final Map<Integer, AuctionListing> slotMappings = new HashMap<>();
 
     public AuctionGui(GuiManager guiManager, AuctionService auctionService, DonutCoreHook donutCoreHook, PlayerAuctionSession session) {
         this.guiManager = guiManager;
@@ -43,7 +40,8 @@ public final class AuctionGui extends BaseGui {
 
     @Override
     public Inventory render(Player player) {
-        Inventory inventory = attach(Bukkit.createInventory(this, 54, TITLE));
+        MessageUtil text = guiManager.plugin().auctionGuiText();
+        Inventory inventory = attach(Bukkit.createInventory(this, 54, text.component("title", "&6Auction")));
         slotMappings.clear();
 
         AuctionBrowseRequest request = session.request();
@@ -53,49 +51,55 @@ public final class AuctionGui extends BaseGui {
 
         for (int slot = 0; slot < Math.min(45, listings.size()); slot++) {
             AuctionListing listing = listings.get(slot);
-            inventory.setItem(slot, buildListingItem(listing, now));
-            slotMappings.put(slot, listing.auctionId());
+            inventory.setItem(slot, buildListingItem(player, listing, now));
+            slotMappings.put(slot, listing);
         }
 
-        // bottom row controls repositioned per user request
         inventory.setItem(47, ItemBuilder.of(Material.CAULDRON)
-                .name(Component.text("Price Sort", NamedTextColor.WHITE))
-                .lore(
-                        Component.text("Current: " + request.sortMode().displayName(), NamedTextColor.GRAY),
-                        Component.text("Click to cycle sorting", NamedTextColor.DARK_GRAY)
-                )
+                .name(text.component("items.sort.name", "&fPrice Sort"))
+                .lore(text.components(
+                        "items.sort.lore",
+                        List.of("&7Current: %sort_mode%", "&8Click to cycle sorting"),
+                        MessageUtil.placeholder("sort_mode", sortModeName(request.sortMode().name()))
+                ))
                 .build());
 
         inventory.setItem(48, ItemBuilder.of(Material.HOPPER)
-                .name(Component.text("Filter", NamedTextColor.WHITE))
-                .lore(
-                        Component.text("Current: " + request.filterCategory().displayName(), NamedTextColor.GRAY),
-                        Component.text("Click to change category", NamedTextColor.DARK_GRAY)
-                )
+                .name(text.component("items.filter.name", "&fFilter"))
+                .lore(text.components(
+                        "items.filter.lore",
+                        List.of("&7Current: %filter_category%", "&8Click to change category"),
+                        MessageUtil.placeholder("filter_category", filterCategoryName(request.filterCategory().name()))
+                ))
                 .build());
 
         inventory.setItem(49, ItemBuilder.of(Material.ANVIL)
-                .name(Component.text("Auction", NamedTextColor.WHITE))
-                .lore(Component.text("Refresh the auction house", NamedTextColor.GRAY))
+                .name(text.component("items.refresh.name", "&fAuction"))
+                .lore(text.components("items.refresh.lore", List.of("&7Refresh the auction house")))
                 .build());
 
         inventory.setItem(50, ItemBuilder.of(Material.OAK_SIGN)
-                .name(Component.text("Search", NamedTextColor.WHITE))
-                .lore(
-                        Component.text(request.searchTerm().isBlank() ? "Current: none" : "Current: " + request.searchTerm(), NamedTextColor.GRAY),
-                        Component.text("Type an item name in chat", NamedTextColor.DARK_GRAY)
-                )
+                .name(text.component("items.search.name", "&fSearch"))
+                .lore(text.components(
+                        "items.search.lore",
+                        List.of("&7Current: %search_term%", "&8Type an item name in chat"),
+                        MessageUtil.placeholder("search_term", request.searchTerm().isBlank()
+                                ? text.text("text.none", "none")
+                                : request.searchTerm())
+                ))
                 .build());
 
         inventory.setItem(51, ItemBuilder.of(Material.CHEST)
-                .name(Component.text("Your Items", NamedTextColor.WHITE))
-                .lore(Component.text("View active, sold, and expired listings", NamedTextColor.GRAY))
+                .name(text.component("items.player-items.name", "&fYour Items"))
+                .lore(text.components("items.player-items.lore", List.of("&7View active, sold, and expired listings")))
                 .build());
 
-        // slot 53 is still next page arrow
         inventory.setItem(53, ItemBuilder.of(Material.ARROW)
-                .name(Component.text("Next Page", NamedTextColor.WHITE))
-                .lore(Component.text(page.hasNextPage() ? "Open the next page" : "No more listings", NamedTextColor.GRAY))
+                .name(text.component("items.next-page.name", "&fNext Page"))
+                .lore(text.components(
+                        page.hasNextPage() ? "items.next-page.lore.available" : "items.next-page.lore.unavailable",
+                        List.of(page.hasNextPage() ? "&7Open the next page" : "&7No more listings")
+                ))
                 .build());
 
         return inventory;
@@ -109,14 +113,19 @@ public final class AuctionGui extends BaseGui {
 
         int slot = event.getSlot();
         if (slotMappings.containsKey(slot)) {
-            UUID auctionId = slotMappings.get(slot);
-            auctionService.purchaseAuction(player, auctionId).thenAccept(result -> sendAndRefresh(player, result));
+            AuctionListing listing = slotMappings.get(slot);
+            if (event.getClick() == ClickType.MIDDLE) {
+                if (player.hasPermission("donutauction.admin")) {
+                    guiManager.openAdminRemovalMenu(player, session, listing);
+                }
+                return;
+            }
+            auctionService.purchaseAuction(player, listing.auctionId()).thenAccept(result -> sendAndRefresh(player, result));
             return;
         }
 
         AuctionBrowseRequest request = session.request();
         if (slot == 47) {
-            // price sort action (no previous page arrow anymore)
             session.request(request.withSortMode(request.sortMode().next()));
             guiManager.refreshAuctionHouse(player);
             return;
@@ -148,30 +157,59 @@ public final class AuctionGui extends BaseGui {
         }
     }
 
-    private ItemStack buildListingItem(AuctionListing listing, long now) {
+    private ItemStack buildListingItem(Player viewer, AuctionListing listing, long now) {
+        MessageUtil text = guiManager.plugin().auctionGuiText();
         ItemStack display = listing.item().clone();
         OfflinePlayer seller = Bukkit.getOfflinePlayer(listing.seller());
         String sellerName;
         if (seller.isOnline() && seller.getPlayer() != null) {
             sellerName = donutCoreHook.resolveDisplayName(seller.getPlayer());
         } else {
-            sellerName = seller.getName() == null ? "Unknown" : seller.getName();
+            sellerName = seller.getName() == null ? text.text("text.unknown-seller", "Unknown") : seller.getName();
         }
         display.editMeta(meta -> {
-            meta.lore(List.of(
-                    Component.text("Price: " + auctionService.formatPrice(listing.price()), NamedTextColor.GRAY),
-                    Component.text("Seller: " + sellerName, NamedTextColor.GRAY),
-                    Component.text("Expires in: " + TimeUtil.formatDuration(listing.expirationTime() - now), NamedTextColor.GRAY),
-                    Component.text("Click to purchase.", NamedTextColor.GREEN)
+            String path = viewer.hasPermission("donutauction.admin") ? "listing.admin-lore" : "listing.lore";
+            List<String> fallbackLore = viewer.hasPermission("donutauction.admin")
+                    ? List.of("&7Price: %price%", "&7Seller: %seller%", "&7Expires in: %time_left%", "&aClick to purchase.", "&cMiddle-click to manage this listing.")
+                    : List.of("&7Price: %price%", "&7Seller: %seller%", "&7Expires in: %time_left%", "&aClick to purchase.");
+            meta.lore(text.components(path, fallbackLore,
+                    MessageUtil.placeholder("price", auctionService.formatPrice(listing.price())),
+                    MessageUtil.placeholder("seller", sellerName),
+                    MessageUtil.placeholder("time_left", TimeUtil.formatDuration(Math.max(0L, listing.expirationTime() - now)))
             ));
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         });
         return display;
     }
 
+    private String sortModeName(String sortModeKey) {
+        return guiManager.plugin().auctionGuiText().text("sort-modes." + sortModeKey, switch (sortModeKey) {
+            case "HIGHEST_PRICE" -> "Highest Price";
+            case "LOWEST_PRICE" -> "Lowest Price";
+            case "LATEST" -> "Latest";
+            case "RECENTLY_LISTED" -> "Recently Listed";
+            default -> sortModeKey;
+        });
+    }
+
+    private String filterCategoryName(String categoryKey) {
+        return guiManager.plugin().auctionGuiText().text("filter-categories." + categoryKey, switch (categoryKey) {
+            case "ALL" -> "All";
+            case "BLOCKS" -> "Blocks";
+            case "TOOLS" -> "Tools";
+            case "FOOD" -> "Food";
+            case "COMBAT" -> "Combat";
+            case "POTIONS" -> "Potions";
+            case "BOOKS" -> "Books";
+            case "INGREDIENTS" -> "Ingredients";
+            case "UTILITIES" -> "Utilities";
+            default -> categoryKey;
+        });
+    }
+
     private void sendAndRefresh(Player player, ActionResult result) {
         guiManager.plugin().schedulerAdapter().runEntity(player, () -> {
-            guiManager.plugin().messages().send(player, result.message());
+            guiManager.plugin().messages().sendRaw(player, result.message());
             guiManager.refreshAuctionHouse(player);
         });
     }

@@ -1,0 +1,38 @@
+title: '&6Auction Filter'
+categories:
+  BLOCKS:
+    name: '&fBlocks'
+    lore:
+      - '&7Filter auction listings'
+  TOOLS:
+    name: '&fTools'
+    lore:
+      - '&7Filter auction listings'
+  FOOD:
+    name: '&fFood'
+    lore:
+      - '&7Filter auction listings'
+  COMBAT:
+    name: '&fCombat'
+    lore:
+      - '&7Filter auction listings'
+  POTIONS:
+    name: '&fPotions'
+    lore:
+      - '&7Filter auction listings'
+  BOOKS:
+    name: '&fBooks'
+    lore:
+      - '&7Filter auction listings'
+  INGREDIENTS:
+    name: '&fIngredients'
+    lore:
+      - '&7Filter auction listings'
+  UTILITIES:
+    name: '&fUtilities'
+    lore:
+      - '&7Filter auction listings'
+clear:
+  name: '&cClear Filter'
+  lore:
+    - '&7Show all listings'

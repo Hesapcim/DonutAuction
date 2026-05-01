@@ -3,10 +3,10 @@ package io.nightbeam.donutauction.gui;
 import io.nightbeam.donutauction.model.AuctionFilterCategory;
 import io.nightbeam.donutauction.model.PlayerAuctionSession;
 import io.nightbeam.donutauction.util.ItemBuilder;
+import io.nightbeam.donutauction.util.MessageUtil;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,8 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
 public final class FilterGui extends BaseGui {
-
-    private static final Component TITLE = Component.text("ᴀᴜᴄᴛɪᴏɴ • ғɪʟᴛᴇʀ", NamedTextColor.GOLD);
 
     private final GuiManager guiManager;
     private final PlayerAuctionSession session;
@@ -28,7 +26,8 @@ public final class FilterGui extends BaseGui {
 
     @Override
     public Inventory render(Player player) {
-        Inventory inventory = attach(Bukkit.createInventory(this, 27, TITLE));
+        MessageUtil text = guiManager.plugin().filterGuiText();
+        Inventory inventory = attach(Bukkit.createInventory(this, 27, text.component("title", "&6Auction Filter")));
         categories.clear();
 
         AuctionFilterCategory[] values = {
@@ -45,15 +44,15 @@ public final class FilterGui extends BaseGui {
         for (int index = 0; index < values.length; index++) {
             AuctionFilterCategory category = values[index];
             inventory.setItem(index, ItemBuilder.of(category.icon())
-                    .name(Component.text(category.displayName(), NamedTextColor.WHITE))
-                    .lore(Component.text("Filter auction listings", NamedTextColor.GRAY))
+                    .name(text.component("categories." + category.name() + ".name", "&f" + category.displayName()))
+                    .lore(text.components("categories." + category.name() + ".lore", List.of("&7Filter auction listings")))
                     .build());
             categories.put(index, category);
         }
 
         inventory.setItem(22, ItemBuilder.of(Material.BARRIER)
-                .name(Component.text("Clear Filter", NamedTextColor.RED))
-                .lore(Component.text("Show all listings", NamedTextColor.GRAY))
+                .name(text.component("clear.name", "&cClear Filter"))
+                .lore(text.components("clear.lore", List.of("&7Show all listings")))
                 .build());
         return inventory;
     }

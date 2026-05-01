@@ -1,0 +1,39 @@
+title: '&6Your Items'
+items:
+  previous-page:
+    name: '&fPrevious Page'
+    lore:
+      available:
+        - '&7Go back'
+      unavailable:
+        - '&7No previous page'
+  back:
+    name: '&fBack to Auction'
+    lore:
+      - '&7Return to the auction browser'
+  next-page:
+    name: '&fNext Page'
+    lore:
+      available:
+        - '&7Open next page'
+      unavailable:
+        - '&7No more listings'
+listing:
+  lore:
+    - '&7Price: %price%'
+    - '&7Time remaining: %time_remaining%'
+    - '%status_line%'
+    - '&a%action_line%'
+status-lines:
+  ACTIVE: '&fStatus: Active'
+  SOLD: '&aStatus: Sold'
+  EXPIRED: '&cStatus: Expired'
+  CANCELLED: '&cStatus: Cancelled'
+action-lines:
+  ACTIVE: Click to cancel auction.
+  SOLD_UNCLAIMED: Click to mark proceeds collected.
+  SOLD_CLAIMED: Already collected.
+  EXPIRED_UNCLAIMED: Click to reclaim item.
+  EXPIRED_CLAIMED: Already collected.
+  CANCELLED_UNCLAIMED: Click to reclaim item.
+  CANCELLED_CLAIMED: Already collected.

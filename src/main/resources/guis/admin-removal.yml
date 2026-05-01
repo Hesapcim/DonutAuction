@@ -1,0 +1,35 @@
+title: '&cAdmin Removal'
+items:
+  remove-no-refund:
+    name: '&cRemove Without Refund'
+    lore:
+      - '&7Delete this listing'
+      - '&7Do not refund the seller'
+  preview:
+    lore:
+      - '&7Seller: %seller%'
+      - '&7Price: %price%'
+      - '&7Time left: %time_left%'
+      - '&8Choose how to remove this listing'
+  remove-with-refund:
+    name: '&aRemove With Refund'
+    lore:
+      - '&7Remove this listing from the market'
+      - '&7Return the item to the seller claim menu'
+  notify:
+    enabled:
+      name: '&aNotify Seller: Enabled'
+      lore:
+        - '&7Seller will receive a removal message'
+        - '&8Click to toggle notification'
+    disabled:
+      name: '&cNotify Seller: Disabled'
+      lore:
+        - '&7Seller will not receive a removal message'
+        - '&8Click to toggle notification'
+  cancel:
+    name: '&fKeep Listing'
+    lore:
+      - '&7Return to the auction browser'
+text:
+  unknown-seller: Unknown

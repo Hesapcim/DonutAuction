@@ -108,6 +108,19 @@ public final class SqlAuctionRepository implements AuctionRepository {
     }
 
     @Override
+    public CompletableFuture<Void> delete(UUID auctionId) {
+        return CompletableFuture.runAsync(() -> {
+            try (Connection connection = databaseManager.dataSource().getConnection();
+                 PreparedStatement statement = connection.prepareStatement("DELETE FROM auctions WHERE auction_id = ?")) {
+                statement.setString(1, auctionId.toString());
+                statement.executeUpdate();
+            } catch (SQLException exception) {
+                throw new CompletionException(exception);
+            }
+        });
+    }
+
+    @Override
     public CompletableFuture<Optional<AuctionListing>> findById(UUID auctionId) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = databaseManager.dataSource().getConnection();

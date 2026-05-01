@@ -1,0 +1,62 @@
+title: '&6Auction'
+items:
+  sort:
+    name: '&fPrice Sort'
+    lore:
+      - '&7Current: %sort_mode%'
+      - '&8Click to cycle sorting'
+  filter:
+    name: '&fFilter'
+    lore:
+      - '&7Current: %filter_category%'
+      - '&8Click to change category'
+  refresh:
+    name: '&fAuction'
+    lore:
+      - '&7Refresh the auction house'
+  search:
+    name: '&fSearch'
+    lore:
+      - '&7Current: %search_term%'
+      - '&8Type an item name in chat'
+  player-items:
+    name: '&fYour Items'
+    lore:
+      - '&7View active, sold, and expired listings'
+  next-page:
+    name: '&fNext Page'
+    lore:
+      available:
+        - '&7Open the next page'
+      unavailable:
+        - '&7No more listings'
+listing:
+  lore:
+    - '&7Price: %price%'
+    - '&7Seller: %seller%'
+    - '&7Expires in: %time_left%'
+    - '&aClick to purchase.'
+  admin-lore:
+    - '&7Price: %price%'
+    - '&7Seller: %seller%'
+    - '&7Expires in: %time_left%'
+    - '&aClick to purchase.'
+    - '&cMiddle-click to manage this listing.'
+sort-modes:
+  HIGHEST_PRICE: Highest Price
+  LOWEST_PRICE: Lowest Price
+  LATEST: Latest
+  RECENTLY_LISTED: Recently Listed
+filter-categories:
+  ALL: All
+  BLOCKS: Blocks
+  TOOLS: Tools
+  FOOD: Food
+  COMBAT: Combat
+  POTIONS: Potions
+  BOOKS: Books
+  INGREDIENTS: Ingredients
+  UTILITIES: Utilities
+text:
+  none: none
+  unknown-seller: Unknown

@@ -13,12 +13,12 @@ softdepend:
 commands:
   ah:
     description: Opens the auction house.
-    usage: /ah [sell <price>|cancel|reload]
+    usage: /ah [sell <price>|cancel|reload|search terms]
     aliases: [auctionhouse]
     permission: donutcore.auction.use
   auction:
     description: Opens the auction house.
-    usage: /auction
+    usage: /auction [search terms]
     permission: donutcore.auction.use
 permissions:
   donutcore.auction.use:
@@ -29,4 +29,7 @@ permissions:
     default: true
   donutcore.auction.admin:
     description: Administrative auction controls.
+    default: op
+  donutauction.admin:
+    description: Allows removing auction listings through the admin moderation menu.
     default: op
